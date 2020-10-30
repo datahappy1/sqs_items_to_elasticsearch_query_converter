@@ -52,13 +52,13 @@ class SqsMessage:
 
 
 def parse_attribute_from_message(message, attribute_name):
+    message_body_dict = json.loads(message["Body"])
+    message_dict = json.loads(message_body_dict["Message"])
+    message_resource_dict = message_dict.get("resource")
     try:
-        message_body_dict = json.loads(message["Body"])
-        message_dict = json.loads(message_body_dict["Message"])
-        message_resource_dict = message_dict.get("resource")
+        return message_resource_dict[attribute_name]
     except KeyError as key_err:
         raise key_err
-    return message_resource_dict[attribute_name]
 
 
 def get_dsl_query_filter_base():

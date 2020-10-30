@@ -1,5 +1,5 @@
 # sqs_to_kibana_query_filter_helper
-This helper tool polls for messages in a specified AWS SQS queue, filters these messages by a "key" name declared as a variable, and returns an Elastic DSL query filter string for your Kibana search, that is lets you search these keys in your Elasticsearch index using a `should` statement.
+This helper tool polls for messages in a specified AWS SQS queue, filters these messages by a "key" name declared as a variable, and returns Elastic DSL query filter JSON for your Kibana search. The returned JSON lets you search for all of these keys in your Elasticsearch index at once using a `should` statement.
 
 # How to run this tool:
 1) Git clone this tool and ideally setup a Pipenv or a plain virtual environment.
