@@ -12,7 +12,7 @@ This helper tool polls for messages in a specified AWS SQS queue, filters these 
     - `QUEUE_VISIBILITY_TIMEOUT_SECONDS` integer, i.e `30` seconds of visibility timeout
     - `COMMON_SQS_AND_ELASTIC_KEY` string, for example `PersonId` ( This is a key in your data that has to be common for the SQS message body and the indexed field in your Elasticsearch index )
 4) Run the `__main__.py` script
-5) Use the result JSON in your Kibana search filter DSL query ![](/docs/img/DSL_query_filter.PNG)
+5) Paste the returned JSON in your Kibana search filter DSL query "EDIT FILTER" input  ![](/docs/img/DSL_query_filter.PNG)
 
 # Useful links:
 - https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sqs.html
