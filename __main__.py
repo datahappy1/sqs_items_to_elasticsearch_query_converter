@@ -1,6 +1,9 @@
+"""
+__main__.py
+"""
+from os import environ
 import json
 import boto3
-from os import environ
 
 AWS_ACCESS_KEY_ID = environ['aws_access_key_id']
 AWS_SECRET_ACCESS_KEY = environ['aws_secret_access_key']
@@ -12,14 +15,20 @@ COMMON_SQS_AND_ELASTIC_KEY = "SomeId"
 
 
 class SqsMessage:
+    """
+    AWS SQS Message class
+    """
     def __init__(self):
         self.session = boto3.Session(aws_access_key_id=AWS_ACCESS_KEY_ID,
                                      aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
                                      region_name=AWS_REGION_NAME)
         self.sqs = self.session.client('sqs')
 
-    def _receive_message(self):
-        # Receive message from SQS queue
+    def receive_message(self):
+        """
+        Receive single message from SQS queue
+        :return:
+        """
         response = self.sqs.receive_message(
             QueueUrl=QUEUE_URL,
             AttributeNames=[
@@ -41,9 +50,13 @@ class SqsMessage:
         return _message
 
     def receive_all_messages(self):
+        """
+        Receive all available messages from SQS queue
+        :return:
+        """
         all_messages = []
         while True:
-            _message_resp = self._receive_message()
+            _message_resp = self.receive_message()
             if not _message_resp:
                 break
             all_messages.append(_message_resp)
@@ -52,6 +65,12 @@ class SqsMessage:
 
 
 def parse_attribute_from_message(message, attribute_name):
+    """
+    function parsing the attribute name from the SQS message body
+    :param message:
+    :param attribute_name:
+    :return:
+    """
     message_body_dict = json.loads(message["Body"])
     message_dict = json.loads(message_body_dict["Message"])
     message_resource_dict = message_dict.get("resource")
@@ -62,6 +81,10 @@ def parse_attribute_from_message(message, attribute_name):
 
 
 def get_dsl_query_filter_base():
+    """
+    function returning the base DSL query definition
+    :return:
+    """
     return {
         "bool": {
             "should": None,
@@ -69,32 +92,37 @@ def get_dsl_query_filter_base():
     }
 
 
-def add_item_to_dsl_query_filter_should(item):
+def add_item_to_dsl_query_filter_should(filter_item):
+    """
+    function returning the DSL should filter single item
+    :param filter_item:
+    :return:
+    """
     elastic_dsl_should = {
         "term": {
-            COMMON_SQS_AND_ELASTIC_KEY: str(item)
+            COMMON_SQS_AND_ELASTIC_KEY: str(filter_item)
         }
     }
     return elastic_dsl_should
 
 
 if __name__ == "__main__":
-    message = SqsMessage()
-    received_messages = message.receive_all_messages()
-    print('Received %s messages' % len(received_messages))
+    MESSAGE = SqsMessage()
+    RECEIVED_MESSAGES_LIST = MESSAGE.receive_all_messages()
+    print('Received %s messages' % len(RECEIVED_MESSAGES_LIST))
 
-    attribute_found_items_list = []
-    for received_message in received_messages:
-        attribute_found_items_list.append(parse_attribute_from_message(received_message,
+    ATTRIBUTE_FOUND_ITEMS_LIST = []
+    for received_message in RECEIVED_MESSAGES_LIST:
+        ATTRIBUTE_FOUND_ITEMS_LIST.append(parse_attribute_from_message(received_message,
                                                                        COMMON_SQS_AND_ELASTIC_KEY))
 
-    should_items_list = []
-    for item in attribute_found_items_list:
-        should_items_list.append(add_item_to_dsl_query_filter_should(item))
+    SHOULD_ITEMS_LIST = []
+    for item in ATTRIBUTE_FOUND_ITEMS_LIST:
+        SHOULD_ITEMS_LIST.append(add_item_to_dsl_query_filter_should(item))
 
-    elastic_dsl_base_query = get_dsl_query_filter_base()
-    elastic_dsl_base_query["bool"]["should"] = should_items_list
+    ELASTIC_DSL_BASE_QUERY = get_dsl_query_filter_base()
+    ELASTIC_DSL_BASE_QUERY["bool"]["should"] = SHOULD_ITEMS_LIST
 
     print('Add this JSON to DSL query filter in your Kibana search:')
     print('--------------------------------------------------------')
-    print(json.dumps(elastic_dsl_base_query))
+    print(json.dumps(ELASTIC_DSL_BASE_QUERY))
