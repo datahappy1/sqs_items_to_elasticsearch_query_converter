@@ -11,7 +11,7 @@ AWS_REGION_NAME = 'us-east-1'
 QUEUE_URL = "https://sqs.us-east-1.amazonaws.com/..."
 QUEUE_VISIBILITY_TIMEOUT_SECONDS = 30
 
-COMMON_SQS_AND_ELASTIC_KEY = "SomeId"
+COMMON_SQS_AND_ELASTIC_KEY = "SomeKey"
 
 
 class SqsMessage:
@@ -43,11 +43,11 @@ class SqsMessage:
         )
 
         try:
-            _message = response['Messages'][0]
+            message = response['Messages'][0]
         except KeyError:
             return None
 
-        return _message
+        return message
 
     def receive_all_messages(self):
         """
